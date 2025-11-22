@@ -75,19 +75,19 @@ export function SlotMachine() {
                 className="w-20 h-20 object-contain animate-move"
               />
             </div>
-            <style jsx>{`
-              @keyframes move {
-                0% { transform: translateX(0); }
-                50% { transform: translateX(10px); }
-                100% { transform: translateX(0); }
-              }
-              .animate-move {
-                animation: move 3s ease-in-out infinite;
-              }
-            `}</style>
           ))
         )}
       </div>
+      <style jsx>{`
+        @keyframes move {
+          0% { transform: translateX(0); }
+          50% { transform: translateX(10px); }
+          100% { transform: translateX(0); }
+        }
+        .animate-move {
+          animation: move 3s ease-in-out infinite;
+        }
+      `}</style>
       <Button onClick={spin} disabled={spinning} variant="outline">
         {spinning ? "Spinning..." : "Spin"}
       </Button>
