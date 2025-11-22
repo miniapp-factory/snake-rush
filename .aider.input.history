@@ -1,0 +1,38 @@
+
+# 2025-11-22 23:03:57.220124
++Code the following app
++```
++Enhanced and More Attractive Prompt (Animal-Themed Slot Machine)
++
++A slot machine with 3 columns and 3 rows, where each slot contains a cute vector-style animal character. Replace the fruits with these animals: Fox, Panda, Lion, Owl. Generate a clean vector illustration with a white background for each animal and use these images inside the machine.
++
++When the user presses the Spin button, the columns should visually “roll” downward with a smooth spinning animation, continuously spawning random animals from the set at the top for 2 seconds. The user cannot spin again while the animation is in progress.
++
++Whenever the machine is not spinning, if any full row or column contains 3 matching animals, immediately display a “You Win!” message. Allow the user to share this win on their feed.
++Check this win condition using direct conditional rendering, not a separate calculation function.
++
++The user should always be able to spin again after the animation completes.
++
++Place this animal-themed slot machine on the home page and make the overall presentation vivid, playful, and fun for the user.
++```
++
++Generate an app logo and update the app metadata title and description.
+
+# 2025-11-22 23:03:57.220569
++Code the following app
++```
++Enhanced and More Attractive Prompt (Animal-Themed Slot Machine)
++
++A slot machine with 3 columns and 3 rows, where each slot contains a cute vector-style animal character. Replace the fruits with these animals: Fox, Panda, Lion, Owl. Generate a clean vector illustration with a white background for each animal and use these images inside the machine.
++
++When the user presses the Spin button, the columns should visually “roll” downward with a smooth spinning animation, continuously spawning random animals from the set at the top for 2 seconds. The user cannot spin again while the animation is in progress.
++
++Whenever the machine is not spinning, if any full row or column contains 3 matching animals, immediately display a “You Win!” message. Allow the user to share this win on their feed.
++Check this win condition using direct conditional rendering, not a separate calculation function.
++
++The user should always be able to spin again after the animation completes.
++
++Place this animal-themed slot machine on the home page and make the overall presentation vivid, playful, and fun for the user.
++```
++
++Generate an app logo and update the app metadata title and description.
