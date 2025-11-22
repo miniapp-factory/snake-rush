@@ -61,7 +61,7 @@ export function SlotMachine() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4 min-h-screen bg-cover bg-center" style={{backgroundImage: 'url(/palm-jungle.png)'}}>
       <div className="grid grid-cols-3 gap-2">
         {grid.map((col, colIdx) =>
           col.map((animal, rowIdx) => (
@@ -72,9 +72,19 @@ export function SlotMachine() {
               <img
                 src={`/${animal}.png`}
                 alt={animal}
-                className="w-20 h-20 object-contain"
+                className="w-20 h-20 object-contain animate-move"
               />
             </div>
+            <style jsx>{`
+              @keyframes move {
+                0% { transform: translateX(0); }
+                50% { transform: translateX(10px); }
+                100% { transform: translateX(0); }
+              }
+              .animate-move {
+                animation: move 3s ease-in-out infinite;
+              }
+            `}</style>
           ))
         )}
       </div>
