@@ -2386,3 +2386,29 @@
 +
 +> To find navigation and other pages in this documentation, fetch the llms.txt file at: https://docs.base.org/llms.txt
 +
+
+# 2025-12-14 17:21:38.079820
++import { Metadata } from 'next';
++
++export const metadata: Metadata = {
++  other: {
++    'base:app_id': '692248127fdd1c4812036588',
++  },
++};
++
++export default function Home() {
++  return (<div>{/* Your page content */}</div>);
++}
+
+# 2025-12-14 17:21:38.080192
++import { Metadata } from 'next';
++
++export const metadata: Metadata = {
++  other: {
++    'base:app_id': '692248127fdd1c4812036588',
++  },
++};
++
++export default function Home() {
++  return (<div>{/* Your page content */}</div>);
++}
