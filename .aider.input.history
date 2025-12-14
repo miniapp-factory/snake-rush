@@ -558,3 +558,1831 @@
 
 # 2025-11-22 23:24:52.451509
 +ARKA PLANI HAYVANAT BAHÇESİ AMBİYANSI YAP PALMİYE AĞAÇLARI OLSUN SLOTTAKİ HAYVANLAR HAREKET BAHÇEDE HREKET ETSİNLER VE PALMİYE AĞAÇLARINA ŞEMPANZE AĞAÇTAN AĞACA ZIPLASIN ARKA PLAN DESENİ YAP
+
+# 2025-12-14 16:53:47.785482
++Denial of Service and Source Code Exposure in React Server Components
++December 11, 2025 by The React Team
++
++Security researchers have found and disclosed two additional vulnerabilities in React Server Components while attempting to exploit the patches in last week’s critical vulnerability.
++
++These new vulnerabilities do not allow for Remote Code Execution. The patch for React2Shell remains effective at mitigating the Remote Code Execution exploit.
++
++The new vulnerabilities are disclosed as:
++
++Denial of Service - High Severity: CVE-2025-55184 and CVE-2025-67779 (CVSS 7.5)
++Source Code Exposure - Medium Severity: CVE-2025-55183 (CVSS 5.3)
++We recommend upgrading immediately due to the severity of the newly disclosed vulnerabilities.
++
++Note
++The patches published earlier are vulnerable. 
++If you already updated for the Critical Security Vulnerability last week, you will need to update again.
++
++If you updated to 19.0.2, 19.1.3, and 19.2.2, these are incomplete and you will need to update again.
++
++Please see the instructions in the previous post for upgrade steps.
++
++Further details of these vulnerabilities will be provided after the rollout of the fixes are complete.
++
++Immediate Action Required 
++These vulnerabilities are present in the same packages and versions as CVE-2025-55182.
++
++This includes versions 19.0.0, 19.0.1, 19.0.2, 19.1.0, 19.1.1, 19.1.2, 19.1.2, 19.2.0, 19.2.1 and 19.2.2 of:
++
++react-server-dom-webpack
++react-server-dom-parcel
++react-server-dom-turbopack
++Fixes were backported to versions 19.0.3, 19.1.4, and 19.2.3. If you are using any of the above packages please upgrade to any of the fixed versions immediately.
++
++As before, if your app’s React code does not use a server, your app is not affected by these vulnerabilities. If your app does not use a framework, bundler, or bundler plugin that supports React Server Components, your app is not affected by these vulnerabilities.
++
++Note
++It’s common for critical CVEs to uncover follow‑up vulnerabilities. 
++When a critical vulnerability is disclosed, researchers scrutinize adjacent code paths looking for variant exploit techniques to test whether the initial mitigation can be bypassed.
++
++This pattern shows up across the industry, not just in JavaScript. For example, after Log4Shell, additional CVEs (1, 2) were reported as the community probed the original fix.
++
++Additional disclosures can be frustrating, but they are generally a sign of a healthy response cycle.
++
++Affected frameworks and bundlers 
++Some React frameworks and bundlers depended on, had peer dependencies for, or included the vulnerable React packages. The following React frameworks & bundlers are affected: next, react-router, waku, @parcel/rsc, @vite/rsc-plugin, and rwsdk.
++
++Please see the instructions in the previous post for upgrade steps.
++
++Hosting Provider Mitigations 
++As before, we have worked with a number of hosting providers to apply temporary mitigations.
++
++You should not depend on these to secure your app, and still update immediately.
++
++React Native 
++For React Native users not using a monorepo or react-dom, your react version should be pinned in your package.json, and there are no additional steps needed.
++
++If you are using React Native in a monorepo, you should update only the impacted packages if they are installed:
++
++react-server-dom-webpack
++react-server-dom-parcel
++react-server-dom-turbopack
++This is required to mitigate the security advisories, but you do not need to update react and react-dom so this will not cause the version mismatch error in React Native.
++
++See this issue for more information.
++
++High Severity: Denial of Service 
++CVEs: CVE-2025-55184 and CVE-2025-67779
++Base Score: 7.5 (High)
++
++Security researchers have discovered that a malicious HTTP request can be crafted and sent to any Server Functions endpoint that, when deserialized by React, can cause an infinite loop that hangs the server process and consumes CPU. Even if your app does not implement any React Server Function endpoints it may still be vulnerable if your app supports React Server Components.
++
++This creates a vulnerability vector where an attacker may be able to deny users from accessing the product, and potentially have a  performance impact on the server environment.
++
++The patches published today mitigate by preventing the infinite loop.
++
++Note
++Additional fix published 
++The original fix addressing the DoS in CVE-2025-55184 was incomplete.
++
++This left versions 19.0.2, 19.1.3, 19.2.2 vulnerable. Versions 19.0.3, 19.1.4, 19.2.3 are safe.
++
++We’ve fixed the additional cases and filed CVE-2025-67779 for the vulnerable versions.
++
++Medium Severity: Source Code Exposure 
++CVE: CVE-2025-55183
++Base Score: 5.3 (Medium)
++
++A security researcher has discovered that a malicious HTTP request sent to a vulnerable Server Function may unsafely return the source code of any Server Function. Exploitation requires the existence of a Server Function which explicitly or implicitly exposes a stringified argument:
++
++'use server';
++
++export async function serverFunction(name) {
++  const conn = db.createConnection('SECRET KEY');
++  const user = await conn.createUser(name); // implicitly stringified, leaked in db
++
++  return {
++   id: user.id,
++   message: `Hello, ${name}!` // explicitly stringified, leaked in reply
++  }}
++An attacker may be able to leak the following:
++
++0:{"a":"$@1","f":"","b":"Wy43RxUKdxmr5iuBzJ1pN"}
++1:{"id":"tva1sfodwq","message":"Hello, async function(a){console.log(\"serverFunction\");let b=i.createConnection(\"SECRET KEY\");return{id:(await b.createUser(a)).id,message:`Hello, ${a}!`}}!"}
++The patches published today prevent stringifying the Server Function source code.
++
++Note
++Only secrets in source code may be exposed. 
++Secrets hardcoded in source code may be exposed, but runtime secrets such as process.env.SECRET are not affected.
++
++The scope of the exposed code is limited to the code inside the Server Function, which may include other functions depending on the amount of inlining your bundler provides.
++
++Always verify against production bundles.
++
++Timeline 
++December 3rd: Leak reported to Vercel and Meta Bug Bounty by Andrew MacPherson.
++December 4th: Initial DoS reported to Meta Bug Bounty by RyotaK.
++December 6th: Both issues confirmed by the React team, and the team began investigating.
++December 7th: Initial fixes created and the React team began verifying and planning new patch.
++December 8th: Affected hosting providers and open source projects notified.
++December 10th: Hosting provider mitigations in place and patches verified.
++December 11th: Additional DoS reported to Meta Bug Bounty by Shinsaku Nomura.
++December 11th: Patches published and publicly disclosed as CVE-2025-55183 and CVE-2025-55184.
++December 11th: Missing DoS case found internally, patched and publicly disclosed as CVE-2025-67779.
++Attribution 
++Thank you to Andrew MacPherson (AndrewMohawk) for reporting the Source Code Exposure, RyotaK from GMO Flatt Security Inc and Shinsaku Nomura of Bitforest Co., Ltd. for reporting the Denial of Service vulnerabilities.
++ERC-8021: Transaction Attribution
++A standardized method for attributing transactions to applications and wallets through data suffixes, enabling interoperable attribution tracking and reward distribution.
++
++Authors	
++Conner Swenberg (@ilikesymmetry)
++Created	2025-09-11
++Discussion Link	https://ethereum-magicians.org/t/erc-8021-transaction-attribution/25561
++Requires	
++ERC-4337
++
++EIP-5792
++
++Markdown
++
++https://raw.githubusercontent.com/ilikesymmetry/ER...
++Abstract
++This ERC defines a standardized method for attributing transactions to applications, wallets, and other entities through structured data suffixes appended to transaction calldata. The standard enables interoperable attribution tracking, supports multiple entity attribution per transaction, and provides a mechanism for reward distribution through registered payout addresses.
++
++Motivation
++Currently, applications informally append "data suffixes" to transactions to indicate their origin, typically using the first bytes of a hash representing the application name. For example, Coinbase adds keccak256("CoinbaseSmartWallet") to transactions from keys.coinbase.com, and apps like Zora and OpenSea employ similar approaches.
++
++This ad-hoc approach presents several limitations:
++
++Non-interoperable attribution: Each application uses custom suffix formats, requiring explicit checks for specific patterns to detect attributions
++Opaque identification: Hash-based suffixes obscure the actual application identity, making attribution analysis difficult
++Reward distribution challenges: Even when an application is identified, there's no standardized way to determine where to send rewards
++Limited multi-entity support: No clear mechanism for attributing transactions to multiple entities (e.g., both application and wallet)
++Lack of extensibility: No standardized way to query additional metadata about attributed entities
++This standard addresses these issues by providing a structured, extensible format for transaction attribution that supports multiple entities, reward distribution, and metadata discovery.
++
++Specification
++The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174.
++
++Data Suffix Schema
++This standard defines a structured data suffix format appended to transaction calldata. The suffix consists of the following components (ordered from end of calldata backwards):
++
++ercSuffix (16 bytes): A special identifier value indicating use of this standard ("8021" repeated)
++schemaId (1 byte): Schema ID number that declares the schema of proceeding bytes with space for forwards compatibility
++schemaData (variable bytes): Data to be parsed according to schemaId
++A schemaId MUST have an associated ERC to be considered valid.
++
++Multi-Attribution Schemas
++Our first schemas enable attributing multiple entities in a single transaction.
++
++Entities are identified by a unique "code" which is a string that follows 7-bit ASCII encoding. A code MUST NOT contain commas (0x2C) as this is reserved as a delimitter for attributing multiple codes.
++
++Codes MUST also be registered in a Code Regsitry smart contract (interface defined in later section). Chains are encouraged to provide canonical code registries which MAY be defined in this or future ERCs.
++
++Schema ID 0 defines the following bytes and assumes chain's canonical Code Registry:
++
++codesLength (1 byte): Length of the codes array in bytes, including delimiters
++codes (variable length): Array of attribution codes using ASCII encoding with comma (0x2C) as delimiter
++Schema ID 1 builds on top of 0, but also defines a custom Code Registry chain and address
++
++codesLength (1 byte): Length of the codes array in bytes, including delimiters
++codes (variable length): Array of attribution codes using ASCII encoding with comma (0x2C) as delimiter
++codeRegistryChainIdLength (1 byte): Length of the chain id hosting the custom Code Registry
++codeRegistryChainId (variable bytes): Chain id hosting the custom Code Registry
++codeRegistryAddress (20 bytes): Address of a smart contract implementing ICodeRegistry
++Custom Code Registries can be referenced across chains for ease of connecting identity for multi-chain apps.
++
++Examples
++The complete suffix format is:
++
++{txData}{schemaData}{schemaId}{ercSuffix}
++Single entity attribution with canonical registry:
++
++{txData}{"baseapp"}{7}{0}{0x80218021802180218021802180218021}
++Multiple entity attribution with custom registry:
++
++{txData}{0xCodeRegistry}{8453}{2}{"baseapp,morpho"}{14}{1}{0x80218021802180218021802180218021}
++Parsing Algorithm
++Offchain parsers SHOULD implement the following algorithm:
++
++Extract the last TBD bytes as ercSuffix and verify it matches the standard identifier
++Extract the previous byte as schemaId
++If schemaId is 0: a. Extract the previous byte as codesLength b. Extract the previous codesLength bytes as codes c. Implicitly set codeRegistryAddress as the registry defined by the host chain d. Parse codes using 0x2C (comma) as delimiter between codes e. Query code-related data from codeRegistryAddress on host chain
++If schemaId is 1: a. Extract the previous byte as codesLength b. Extract the previous codesLength bytes as codes c. Extract the previous byte as codeRegistryChainIdLength d. Extract the previous codeRegistryChainIdLength bytes as codeRegistryChainId e. Extract the previous 20 bytes as codeRegistryAddress f. Parse codes using 0x2C (comma) as delimiter between codes g. Query code-related data from codeRegistryAddress on chain with id codeRegistryChainId
++Else schemaId does not match, parsing SHOULD terminate (unknown schemaId)
++Code Registry Interface
++A Code Registry MUST implement the following interface:
++
++interface ICodeRegistry {
++    /// @notice Fetch a code's address to payout incentives
++    /// @param code The code to query
++    /// @return The address to receive rewards for this code
++    function payoutAddress(string memory code) external view returns (address);
++    
++    /// @notice Fetch a code's URI to fetch for additional metadata
++    /// @param code The code to query  
++    /// @return The URI pointing to metadata about this code
++    function codeURI(string memory code) external view returns (string memory);
++    
++    /// @notice Check if a code is valid format (characters, length, etc)
++    /// @dev MUST return false if code is empty string
++    /// @param code The code to query
++    /// @return True if the code is valid, false otherwise
++    function isValidCode(string memory code) external view returns (bool);
++    
++    /// @notice Check if a code is registered
++    /// @param code The code to query
++    /// @return True if the code is registered, false otherwise
++    function isRegistered(string memory code) external view returns (bool);
++}
++Code Regsitry Canonical Addresses
++Chain ID	Code Registry
++8453	TBD
++84532	TBD
++Code Metadata
++Querying CodeRegistry.codeURI(code) returns a string uri to fetch actual metadata, following from NFT patterns. The returned metadata SHOULD include these fields:
++
++type CodeMetadata = {
++    app: {
++      name: string
++      url: string
++    }
++}
++Future ERCs can extend this schema.
++
++ERC-5792 Integration
++Applications using ERC-5792's wallet_sendCalls RPC method MUST communicate attribution data through a new capability:
++
++interface DataSuffixCapability {
++  dataSuffix: string; // Hex-encoded bytes to append as suffix
++}
++Wallets implementing this capability MUST append the provided dataSuffix bytes to the transaction calldata. Wallets MAY optionally insert their own attribution code before the application's suffix if they understand this standard.
++
++ERC-4337 User Operation Implementation
++For ERC-4337 compliant smart accounts, the implementation differs from normal Ethereum transactions:
++
++Normal Transactions: The attribution suffix is appended to the data field of the top-level Ethereum transaction.
++
++ERC-4337 User Operations: The attribution suffix MUST be appended to the userOp.callData field instead of the transaction-level data field, since smart account transactions are executed through the EntryPoint contract where the actual call data is contained within the user operation structure.
++
++When implementing attribution for smart accounts:
++
++Applications SHOULD append the suffix to userOp.callData when constructing user operations
++Parsers MUST examine the callData field of user operations rather than transaction data when processing ERC-4337 transactions
++Wallets supporting both EOA and smart account transactions MUST handle suffix appending appropriately based on the account type
++This ensures attribution data remains accessible and parseable regardless of whether the transaction originates from an externally owned account (EOA) or a smart contract account following ERC-4337.
++
++Rationale
++Design Decisions
++Reverse-order parsing: The suffix format is designed for parsing from the end of calldata backwards, enabling efficient detection of attribution without requiring knowledge of the original calldata length.
++
++schemaId byte: Including a schemaId field enables future extensions and optimizations in minimizing attribution data.
++
++Registry pattern: Using a registry contract allows entities to update their payout addresses and metadata without requiring transaction format changes.
++
++ASCII encoding: Using human-readable ASCII codes improves debuggability and allows for meaningful code names rather than opaque hashes.
++
++ERC-5792 integration: The capability-based approach aligns with ERC-5792's extensible design while providing a clean separation of concerns between applications and wallets.
++
++Alternative Approaches Considered
++Customizable registry: While a single global registry is recommended when available for reduced transaction data, the flexible registry approach allows different ecosystems to maintain their own attribution systems.
++
++Fixed-length codes: A fixed-length encoding was considered but rejected to allow for flexible, human-readable identifiers.
++
++ERC-721 dependency: While codes may be implemented as ERC-721 NFTs, reducing strict dependencies makes this proposal more flexible and clarifies the minimal interface truly required for attribution.
++
++Structured ERC-5792 capability: A generic bytes dataSuffix minimizes the effort on wallets to integrate and maintain support for new schemaIds, increasing chances of wide adoption.
++
++Backwards Compatibility
++This standard is fully backward compatible with existing transaction formats. Transactions without attribution suffixes continue to function normally, and the presence of attribution data does not affect transaction execution.
++
++Existing applications using informal attribution methods can migrate to this standard while maintaining their current functionality during the transition period.
++
++Security Considerations
++Parsing Safety
++Parsers MUST validate the suffix format before processing to prevent malformed data from causing errors. Invalid suffixes SHOULD be ignored rather than causing parsing failures.
++
++Registry Trust
++The security of attribution data depends on the trustworthiness of the registry contract. Users and applications SHOULD verify the registry implementation and governance before relying on its data.
++
++Data Integrity
++Since attribution data is appended to calldata, it could potentially be modified by intermediaries. Applications requiring cryptographic proof of attribution should implement additional signature-based verification mechanisms.
++
++Privacy Considerations
++Attribution data is publicly visible on-chain. Applications handling sensitive user information SHOULD NOT include identifying information in attribution codes.
++
++Test Cases
++Single entity attribution + canonical registry:
++
++Input: 0xdddddddd62617365617070070080218021802180218021802180218021
++Expected: 
++- txData: 0xdddddddd
++- schemaId: 0
++- codes: ["baseapp"]
++- registry: canonical
++Multiple entity attribution + custom registry:
++
++Input: 0xddddddddcccccccccccccccccccccccccccccccccccccccc210502626173656170702C6D6F7270686F0E0180218021802180218021802180218021
++Expected:
++- txData: 0xdddddddd
++- schemaId: 1
++- codes: ["baseapp", "morpho"]
++- codeRegistryChainId: 8453
++- codeRegistryAddress: 0xcccccccccccccccccccccccccccccccccccccccc
++Invalid schemaId handling:
++
++Input: 0xddddddddff80218021802180218021802180218021
++Expected: Parsing stops, unknown schemaId
++# Base Builder Codes
++
++> Integrate Builder Codes to attribute onchain activity to your app or wallet.
++
++## What are Builder Codes
++
++Base Builder Codes are an ERC-721 NFT collection where unique codes (e.g. “abc123”) are minted to help identify builders onchain.
++
++Each code has associated metadata. Onchain metadata primarily includes a “payout address” where each code declares where potential rewards should be sent to. Offchain metadata includes more details about the app including its name and site.
++
++## Automatic Builder-Code Attribution on Base
++
++Once your app is registered on [Base.dev](http://base.dev/), the Base App will auto-append your Base Builder Code to transactions its users make in your app (e.g. via your mini app, or the Base App's browser). This powers your onchain analytics in [Base.dev](http://base.dev/) and qualifies you for potential future rewards.
++
++## For App Developers
++
++<Note>
++  Mini Apps in the Base app will have their builder codes auto-appended to their transactions.
++  Be sure to [register for Base.dev](https://base.dev/)
++</Note>
++
++Integrating Builder Codes requires appending a suffix—provided by Base—to your transaction data.
++
++<Steps>
++  <Step title="Get your Builder Code">
++    When you register on **base.dev**, you will receive a **Builder Code**. This is a random string (e.g., `k3p9da`) that you will use to generate your attribution suffix.
++  </Step>
++
++  <Step title="Append the Suffix to Transactions">
++    The recommended way to attach your suffix is using `wallet_sendCalls` (ERC-5792). This passes the suffix through a capability, allowing the wallet to handle the attachment automatically for both EOA and Smart Account (ERC-4337) users.
++
++    <Tabs>
++      <Tab title="Wagmi (Recommended)">
++        Use the `useSendCalls` hook from Wagmi's features to pass the `dataSuffix` capability.
++
++        ```typescript lines highlight={14-16} theme={null}
++        import { useSendCalls } from 'wagmi'
++        import { Attribution } from 'ox/erc8021'
++
++        // Your builder code provided by base.dev
++        const builderCode = "abcd1234" 
++        const dataSuffix = Attribution.toDataSuffix({
++            codes: [builderCode]
++        })
++
++        function SendTx() {
++          const { sendCalls } = useSendCalls()
++
++          async function submit() {
++            await sendCalls({
++              calls: [
++                {
++                  to: "0xYourContract",
++                  data: "0xYourCalldata"
++                }
++              ],
++              capabilities: {
++                dataSuffix: dataSuffix
++              }
++            })
++          }
++
++          return <button onClick={submit}>Send</button>
++        }
++        ```
++      </Tab>
++
++      <Tab title="Viem">
++        If you are using Viem directly, pass the `dataSuffix` in the `capabilities` object.
++
++        ```typescript lines highlight={11-13} theme={null}
++        import { walletClient } from './client'
++        import { Attribution } from 'ox/erc8021'
++
++        // Your builder code provided by base.dev
++        const builderCode = "abcd1234" 
++        const dataSuffix = Attribution.toDataSuffix({
++            codes: [builderCode]
++        })
++
++        await walletClient.sendCalls({
++          calls: [
++            {
++              to: "0xYourContract",
++              data: "0xYourCalldata"
++            }
++          ],
++          capabilities: {
++            dataSuffix: dataSuffix
++          }
++        })
++        ```
++      </Tab>
++
++      <Tab title="Legacy (writeContract)">
++        If you are restricted to `writeContract` (EOA only), you must manually append the suffix to the calldata. This is **not recommended** as it does not support Smart Accounts automatically.
++
++        ```typescript lines highlight={15} theme={null}
++        import { encodeFunctionData } from 'viem'
++        import { Attribution } from 'ox/erc8021'
++
++        // Your builder code provided by base.dev
++        const builderCode = "abcd1234" 
++        const dataSuffix = Attribution.toDataSuffix({
++            codes: [builderCode]
++        })
++
++        // 1. Encode your function call
++        const encoded = encodeFunctionData({
++          abi,
++          functionName: "yourFn",
++          args: [a, b, c],
++        })
++
++        // 2. Manually append the suffix (stripping the '0x' prefix from the suffix)
++        const dataWithSuffix = encoded + dataSuffix.slice(2)
++
++        // 3. Send the transaction
++        await sendTransaction({
++          to: "0xYourContract",
++          data: dataWithSuffix,
++        })
++        ```
++      </Tab>
++    </Tabs>
++  </Step>
++</Steps>
++
++Once you have added the suffix, your app is fully ERC-8021 compliant.
++
++***
++
++## For Wallet Developers
++
++Wallet providers need to support the `dataSuffix` capability to enable attribution. This involves accepting the capability and appending the suffix to the calldata before signing.
++
++<Steps>
++  <Step title="Support the dataSuffix Capability">
++    Your wallet should accept a `dataSuffix` string in the `capabilities` object of `wallet_sendCalls`.
++
++    ```typescript lines theme={null}
++    interface DataSuffixCapability {
++      dataSuffix: string; // hex-encoded bytes provided by the app
++    }
++    ```
++  </Step>
++
++  <Step title="Append Suffix to Calldata">
++    When constructing the transaction or User Operation, extract the `dataSuffix` and append it to the calldata.
++
++    <Tabs>
++      <Tab title="EOA Transactions">
++        Append to `tx.data`.
++
++        ```typescript lines theme={null}
++        // Minimal example for EOA
++        function applySuffixToEOA(tx, capabilities) {
++          const suffix = capabilities.find(c => c.dataSuffix)?.dataSuffix
++          if (!suffix) return tx
++
++          return {
++            ...tx,
++            // Append suffix bytes (remove 0x prefix from suffix if tx.data has it)
++            data: tx.data + suffix.slice(2) 
++          }
++        }
++        ```
++      </Tab>
++
++      <Tab title="ERC-4337 User Operations">
++        Append to `userOp.callData` (not the transaction-level calldata).
++
++        ```typescript lines theme={null}
++        // Minimal example for ERC-4337
++        function applySuffixToUserOp(userOp, capabilities) {
++          const suffix = capabilities.find(c => c.dataSuffix)?.dataSuffix
++          if (!suffix) return userOp
++
++          return {
++            ...userOp,
++            // Append suffix bytes to the UserOp callData
++            callData: userOp.callData + suffix.slice(2)
++          }
++        }
++        ```
++      </Tab>
++    </Tabs>
++  </Step>
++
++  <Step title="(Optional) Add Wallet Attribution">
++    Wallets may also include their own attribution code (their own ERC-8021 suffix) by simply prepending the wallet’s own suffix before the app’s.
++
++    * **No interaction required with apps:** The wallet handles this independently.
++    * **Multi-code support:** ERC-8021 natively supports multiple attribution codes.
++
++    **Example:**
++
++    ```typescript  theme={null}
++    finalSuffix = walletSuffix + appSuffix
++    ```
++
++    This ensures both the app and the wallet receive onchain attribution.
++  </Step>
++</Steps>
++
++## For Base-Solana Bridge Developers
++
++<Warning>
++  Onchain Builder codes are currently still not live on mainnet.
++</Warning>
++
++Builder codes work with the [Base-Solana bridge](/base-chain/quickstart/base-solana-bridge) via the `hookData` mechanism. Currently available for **Solana → Base** flows only.
++
++<Steps>
++  <Step title="Get your Builder Code">
++    When you register on base.dev, you will receive a Builder Code. This is a random string (e.g., k3p9da) that you will use to generate your attribution suffix.
++  </Step>
++
++  <Step title="Build hookData">
++    ABI-encode the user address, your code, and fee:
++
++    ```solidity  theme={null}
++    bytes memory hookData = abi.encode(
++      0xUSER,           // destination address on Base (NOT the Twin)
++      0xBUILDER_CODE,   // your bytes32 code
++      100               // feeBps (100 = 1%)
++    );
++    ```
++  </Step>
++
++  <Step title="Attach to Bridge Message">
++    Set `to = BRIDGE_CAMPAIGN_ADDRESS` and attach a call to `Flywheel.send`.
++
++    <Tabs>
++      <Tab title="Simple Bridge">
++        For a bridge with no follow-up call:
++
++        ```
++        to:     <BRIDGE_CAMPAIGN_ADDRESS>
++        amount: 100
++        call:
++          ty:    Call
++          to:    <FLYWHEEL_ADDRESS>
++          value: 0
++          data:  abi.encodeWithSelector(
++                   Flywheel.send.selector,
++                   <BRIDGE_CAMPAIGN_ADDRESS>,
++                   <wSOL_ADDRESS>,
++                   hookData
++                 )
++        ```
++      </Tab>
++
++      <Tab title="Bridge + Follow-Up Call">
++        To chain additional calls, use `DelegateCall` with `Multicall`:
++
++        ```solidity  theme={null}
++        Call[] memory calls = new Call[](2);
++
++        // 1) Flywheel attribution (must be first)
++        calls[0] = Call({
++          to:    <FLYWHEEL_ADDRESS>,
++          value: 0,
++          data:  abi.encodeWithSelector(
++                   Flywheel.send.selector,
++                   <BRIDGE_CAMPAIGN_ADDRESS>,
++                   <wSOL_ADDRESS>, // 0x311935Cd80B76769bF2ecC9D8Ab7635b2139cf82 on Base Mainnet
++                   hookData
++                 )
++        });
++
++        // 2) Your follow-up call
++        calls[1] = Call({
++          to:    <YOUR_CONTRACT>,
++          value: 0,
++          data:  abi.encodeWithSelector(YourContract.yourFunction.selector)
++        });
++        ```
++
++        Then set the bridge call to:
++
++        ```
++        call:
++          ty:    DelegateCall
++          to:    <MULTICALL_ADDRESS> // 0xcA11bde05977b3631167028862bE2a173976CA11 on Base Mainnet
++          data:  abi.encodeWithSelector(Multicall.multicall.selector, calls)
++        ```
++      </Tab>
++    </Tabs>
++  </Step>
++</Steps>
++
++***
++
++## Give feedback!
++
++<Note>
++  We're constantly working to improve the Builder Codes experience. If you have any feedback, please let us know  [here](https://t.co/zwvtmXXzGz).
++</Note>
++
++
++---
++
++> To find navigation and other pages in this documentation, fetc
++add-mini-app.tsx
++
++# Featured Checklist
++
++> Build high quality mini apps to get more distribution.
++
++Your app must meet all product, design, and technical guidelines outlined below. Meeting these guidelines is a prerequisite for featured placement, but **does not guarantee placement**. Base holds a very high bar for featured placement.
++
++<Note>
++  To submit your app for featured placement, first verify your mini app in the [Base Build dashboard](https://base.dev/), then fill out the [submission form](https://buildonbase.deform.cc/getstarted/).
++</Note>
++
++<Steps titleSize="h3">
++  <Step title="Authentication">
++    * In-app authentication stays within the Base app with no external redirects
++    * Wallet connection happens automatically
++    * No email or phone verification inside the app
++  </Step>
++
++  <Step title="Onboarding Flow">
++    * Explain the purpose of the app and how to get started, with clear onboarding instructions either on the home page or as a a pop-up window.
++    * App only requests essential personal information, with clear context
++    * Display user's avatar and username **(no 0x addresses)**
++  </Step>
++
++  <Step title="Base Compatibility">
++    * App is client-agnostic, with no hard-coded Farcaster text or links, or other client-specific behavior
++    * Transactions are sponsored
++  </Step>
++
++  <Step title="Layout">
++    * Call to actions are visible and centered on page
++    * App has a bottom navigation bar or side menu to easily access core flow
++    * All buttons are accessible and not cut off
++    * Navigation bar items have clear, understandable labels
++  </Step>
++
++  <Step title="Load Time">
++    * App loads within **3 seconds**
++
++    * In-app actions complete within **1 second**
++
++    * Loading indicators are shown during actions
++  </Step>
++
++  <Step title="Usability">
++    * App supports **light and dark modes** consistently
++    * App has minimum **44px touch targets**
++  </Step>
++
++  <Step title="App Metadata">
++    * App description is clear, concise, and user-focused
++    * App icon is **1024×1024 px**, PNG, **no transparency**, readable at small sizes
++    * App cover photo is **high quality**, does not contain Base logo or team photos, and is 1200×630px (1.91:1) dimensions, PNG/JPG.
++    * Include 3 screenshots that highlight key app functionality. Use portrait orientation with 1284x2778 dimensions.
++    * Subtitle should be descriptive and specific, and use sentence case capitalization with no punctuation at the end.
++  </Step>
++</Steps>
++
++## Next Steps
++
++<CardGroup>
++  <Card title="Product Guidelines" icon="lightbulb" href="/mini-apps/featured-guidelines/product-guidelines" />
++
++  <Card title="Design Guidelines" icon="brush" href="/mini-apps/featured-guidelines/design-guidelines" />
++
++  <Card title="Technical Guidelines" icon="wrench" href="/mini-apps/featured-guidelines/technical-guidelines" />
++
++  <Card title="Notification Guidelines" icon="bell" href="/mini-apps/featured-guidelines/notification-guidelines" />
++</CardGroup>
++
++
++---
++
++> To find navigation and other pages in this documentation, fetch the llms.txt file at: https://docs.base.org/llms.txt
++Manifest
++
++> Define how your mini app appears and behaves within the Base app, enabling search, discovery, and rich embed features in the Base app.
++
++<Panel>
++  ```json farcaster.json theme={null}
++  {
++    "accountAssociation": {
++      "header": "eyJmaWQiOjkxNTIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMmVmNzkwRGQ3OTkzQTM1ZkQ4NDdDMDUzRURkQUU5NDBEMDU1NTk2In0",
++      "payload": "eyJkb21haW4iOiJhcHAuZXhhbXBsZS5jb20ifQ",
++      "signature": "MHgxMGQwZGU4ZGYwZDUwZTdmMGIxN2YxMTU2NDI1MjRmZTY0MTUyZGU4ZGU1MWU0MThiYjU4ZjVmZmQxYjRjNDBiNGVlZTRhNDcwNmVmNjhlMzQ0ZGQ5MDBkYmQyMmNlMmVlZGY5ZGQ0N2JlNWRmNzMwYzUxNjE4OWVjZDJjY2Y0MDFj"
++    },
++    "miniapp": {
++      "version": "1",
++      "name": "Crypto Portfolio Tracker",
++      "homeUrl": "https://ex.co",
++      "iconUrl": "https://ex.co/i.png",
++      "splashImageUrl": "https://ex.co/l.png",
++      "splashBackgroundColor": "#000000",
++      "subtitle": "Easy to manage",
++      "description": "Track and manage your cryptocurrency portfolio.",
++      "screenshotUrls": [
++        "https://ex.co/s1.png",
++        "https://ex.co/s2.png",
++        "https://ex.co/s3.png"
++      ],
++      "primaryCategory": "finance",
++      "tags": ["finance"],
++      "heroImageUrl": "https://ex.co/og.png",
++      "tagline": "Save instantly",
++      "ogTitle": "Example Mini App",
++      "ogDescription": "Easy to manage portfolio.",
++      "ogImageUrl": "https://ex.co/og.png",
++      "noindex": true
++    }
++  }
++  ```
++
++  <Tip>
++    Set `"noindex": true` for development or staging environments to prevent search indexing.
++  </Tip>
++</Panel>
++
++## Implementation
++
++1. Create the manifest file in your project at `/public/.well-known/farcaster.json`. It needs to be accessible at `https://your-domain.com/.well-known/farcaster.json`
++2. Update the [required](#accountassociation) and [optional](#display-information) fields in the `miniapp` object
++3. Ensure all changes are live so that the Manifest file is available at your app's url
++4. Navigate to the Base Build [Account association tool](https://www.base.dev/preview?tab=account)
++5. Paste your domain in the App URL field (ex: sample-url.vercel.app) and click "Submit"
++6. Click on the "Verify" button that appears and sign the manifest with your wallet to generate the `accountAssociation` fields
++7. Copy the generated `accountAssociation` fields (header, payload, and signature) and paste them into your manifest file, replacing the empty values in the `accountAssociation` object
++
++<Warning>
++  Changes to the manifest take effect when you redeploy your Mini App and repost it. The platform re-indexes the updated configuration and applies changes to search, discovery, and embed rendering.
++</Warning>
++
++<Tip>
++  Use the [Mini App Assets Generator](https://www.miniappassets.com/) to generate properly formatted icons, splash screens, and images that meet the requirements for both Base App and Farcaster mini apps.
++</Tip>
++
++## Schema
++
++### accountAssociation
++
++Proves domain ownership for your Mini App.
++
++<Card>
++  <ParamField path="header" type="string" required>
++    Encoded header for the association payload.
++  </ParamField>
++
++  <ParamField path="payload" type="string" required>
++    Encoded payload containing your domain.
++  </ParamField>
++
++  <ParamField path="signature" type="string" required>
++    Signature over the payload.
++  </ParamField>
++</Card>
++
++#### Identity & Launch
++
++Defines your Mini App's core identity and the URL users land on when they open it.
++
++<Card>
++  <ParamField path="version" type="string" required>
++    Manifest version. Must be `"1"`.
++  </ParamField>
++
++  <ParamField path="name" type="string" required>
++    Mini App name. Max 32 chars.
++  </ParamField>
++
++  <ParamField path="homeUrl" type="string" required>
++    Default launch URL. HTTPS URL, max 1024 chars.
++  </ParamField>
++
++  <ParamField path="iconUrl" type="string" required>
++    Icon image URL. HTTPS URL, PNG 1024×1024; transparent background discouraged.
++  </ParamField>
++</Card>
++
++#### Loading Experience
++
++Controls the splash screen visuals and colors shown while your Mini App loads.
++
++<Card>
++  <ParamField path="splashImageUrl" type="string" required>
++    Loading image. HTTPS URL, recommended 200×200px.
++  </ParamField>
++
++  <ParamField path="splashBackgroundColor" type="string" required>
++    Loading background color. Hex code (e.g., `#000000`).
++  </ParamField>
++</Card>
++
++#### Discovery & Search
++
++Determines how your Mini App is indexed, categorized, and surfaced across Base App discovery features.
++
++<Card>
++  <ParamField path="primaryCategory" type="string" required>
++    Controls where your app appears in category browsing. One of: `games`, `social`, `finance`, `utility`, `productivity`, `health-fitness`, `news-media`, `music`, `shopping`, `education`, `developer-tools`, `entertainment`, `art-creativity`.
++  </ParamField>
++
++  <ParamField path="tags" type="string[]" required>
++    Search/filter tags. Up to 5; ≤ 20 chars each; lowercase; no spaces/emojis/special chars.
++  </ParamField>
++
++  <ParamField path="noindex" type="boolean">
++    Exclude from search results. `true` = exclude, default = include.
++  </ParamField>
++</Card>
++
++#### Display Information
++
++Provides the descriptive text, screenshots, and promotional images shown on your Mini App's profile.
++
++<Card>
++  <ParamField path="subtitle" type="string">
++    Short description under name. Max 30 chars; avoid emojis/special chars.
++  </ParamField>
++
++  <ParamField path="description" type="string">
++    Promo text for app page. Max 170 chars; avoid emojis/special chars.
++  </ParamField>
++
++  <ParamField path="tagline" type="string" required>
++    Marketing tagline. Max 30 chars.
++  </ParamField>
++
++  <ParamField path="heroImageUrl" type="string" required>
++    Large promo image. 1200×630px (1.91:1), PNG/JPG.
++  </ParamField>
++
++  <ParamField path="screenshotUrls" type="string[]" required>
++    Visual previews. Max 3; portrait 1284×2778px recommended.
++  </ParamField>
++</Card>
++
++#### Notifications
++
++Notification endpoint.
++
++<Card>
++  <ParamField path="webhookUrl" type="string">
++    POST events endpoint. HTTPS URL, max 1024 chars. Required if using notifications.
++  </ParamField>
++</Card>
++
++<Warning>
++  Only add webhookUrl if you are using notifications or save functionality. This must be a valid URL.
++</Warning>
++
++#### Embeds & Social Sharing
++
++Configures how your Mini App appears when shared in feeds or on social platforms.
++
++<Card>
++  <ParamField path="ogTitle" type="string">
++    Open Graph title. Max 30 chars.
++  </ParamField>
++
++  <ParamField path="ogDescription" type="string">
++    Open Graph description. Max 100 chars.
++  </ParamField>
++
++  <ParamField path="ogImageUrl" type="string">
++    Open Graph image. 1200×630px (1.91:1), PNG/JPG.
++  </ParamField>
++</Card>
++
++## Related Concepts
++
++<CardGroup cols={1}>
++  <Card title="Embeds and Previews" href="/mini-apps/core-concepts/embeds-and-previews">
++    Understand how your manifest creates rich embeds when your Mini App is shared in feeds and social platforms.
++  </Card>
++</CardGroup>
++
++
++---
++
++> To find navigation and other pages in this documentation, fetch the llms.txt file at: https://docs.base.org/llms.txt
++
+
+# 2025-12-14 16:53:47.788101
++Denial of Service and Source Code Exposure in React Server Components
++December 11, 2025 by The React Team
++
++Security researchers have found and disclosed two additional vulnerabilities in React Server Components while attempting to exploit the patches in last week’s critical vulnerability.
++
++These new vulnerabilities do not allow for Remote Code Execution. The patch for React2Shell remains effective at mitigating the Remote Code Execution exploit.
++
++The new vulnerabilities are disclosed as:
++
++Denial of Service - High Severity: CVE-2025-55184 and CVE-2025-67779 (CVSS 7.5)
++Source Code Exposure - Medium Severity: CVE-2025-55183 (CVSS 5.3)
++We recommend upgrading immediately due to the severity of the newly disclosed vulnerabilities.
++
++Note
++The patches published earlier are vulnerable. 
++If you already updated for the Critical Security Vulnerability last week, you will need to update again.
++
++If you updated to 19.0.2, 19.1.3, and 19.2.2, these are incomplete and you will need to update again.
++
++Please see the instructions in the previous post for upgrade steps.
++
++Further details of these vulnerabilities will be provided after the rollout of the fixes are complete.
++
++Immediate Action Required 
++These vulnerabilities are present in the same packages and versions as CVE-2025-55182.
++
++This includes versions 19.0.0, 19.0.1, 19.0.2, 19.1.0, 19.1.1, 19.1.2, 19.1.2, 19.2.0, 19.2.1 and 19.2.2 of:
++
++react-server-dom-webpack
++react-server-dom-parcel
++react-server-dom-turbopack
++Fixes were backported to versions 19.0.3, 19.1.4, and 19.2.3. If you are using any of the above packages please upgrade to any of the fixed versions immediately.
++
++As before, if your app’s React code does not use a server, your app is not affected by these vulnerabilities. If your app does not use a framework, bundler, or bundler plugin that supports React Server Components, your app is not affected by these vulnerabilities.
++
++Note
++It’s common for critical CVEs to uncover follow‑up vulnerabilities. 
++When a critical vulnerability is disclosed, researchers scrutinize adjacent code paths looking for variant exploit techniques to test whether the initial mitigation can be bypassed.
++
++This pattern shows up across the industry, not just in JavaScript. For example, after Log4Shell, additional CVEs (1, 2) were reported as the community probed the original fix.
++
++Additional disclosures can be frustrating, but they are generally a sign of a healthy response cycle.
++
++Affected frameworks and bundlers 
++Some React frameworks and bundlers depended on, had peer dependencies for, or included the vulnerable React packages. The following React frameworks & bundlers are affected: next, react-router, waku, @parcel/rsc, @vite/rsc-plugin, and rwsdk.
++
++Please see the instructions in the previous post for upgrade steps.
++
++Hosting Provider Mitigations 
++As before, we have worked with a number of hosting providers to apply temporary mitigations.
++
++You should not depend on these to secure your app, and still update immediately.
++
++React Native 
++For React Native users not using a monorepo or react-dom, your react version should be pinned in your package.json, and there are no additional steps needed.
++
++If you are using React Native in a monorepo, you should update only the impacted packages if they are installed:
++
++react-server-dom-webpack
++react-server-dom-parcel
++react-server-dom-turbopack
++This is required to mitigate the security advisories, but you do not need to update react and react-dom so this will not cause the version mismatch error in React Native.
++
++See this issue for more information.
++
++High Severity: Denial of Service 
++CVEs: CVE-2025-55184 and CVE-2025-67779
++Base Score: 7.5 (High)
++
++Security researchers have discovered that a malicious HTTP request can be crafted and sent to any Server Functions endpoint that, when deserialized by React, can cause an infinite loop that hangs the server process and consumes CPU. Even if your app does not implement any React Server Function endpoints it may still be vulnerable if your app supports React Server Components.
++
++This creates a vulnerability vector where an attacker may be able to deny users from accessing the product, and potentially have a  performance impact on the server environment.
++
++The patches published today mitigate by preventing the infinite loop.
++
++Note
++Additional fix published 
++The original fix addressing the DoS in CVE-2025-55184 was incomplete.
++
++This left versions 19.0.2, 19.1.3, 19.2.2 vulnerable. Versions 19.0.3, 19.1.4, 19.2.3 are safe.
++
++We’ve fixed the additional cases and filed CVE-2025-67779 for the vulnerable versions.
++
++Medium Severity: Source Code Exposure 
++CVE: CVE-2025-55183
++Base Score: 5.3 (Medium)
++
++A security researcher has discovered that a malicious HTTP request sent to a vulnerable Server Function may unsafely return the source code of any Server Function. Exploitation requires the existence of a Server Function which explicitly or implicitly exposes a stringified argument:
++
++'use server';
++
++export async function serverFunction(name) {
++  const conn = db.createConnection('SECRET KEY');
++  const user = await conn.createUser(name); // implicitly stringified, leaked in db
++
++  return {
++   id: user.id,
++   message: `Hello, ${name}!` // explicitly stringified, leaked in reply
++  }}
++An attacker may be able to leak the following:
++
++0:{"a":"$@1","f":"","b":"Wy43RxUKdxmr5iuBzJ1pN"}
++1:{"id":"tva1sfodwq","message":"Hello, async function(a){console.log(\"serverFunction\");let b=i.createConnection(\"SECRET KEY\");return{id:(await b.createUser(a)).id,message:`Hello, ${a}!`}}!"}
++The patches published today prevent stringifying the Server Function source code.
++
++Note
++Only secrets in source code may be exposed. 
++Secrets hardcoded in source code may be exposed, but runtime secrets such as process.env.SECRET are not affected.
++
++The scope of the exposed code is limited to the code inside the Server Function, which may include other functions depending on the amount of inlining your bundler provides.
++
++Always verify against production bundles.
++
++Timeline 
++December 3rd: Leak reported to Vercel and Meta Bug Bounty by Andrew MacPherson.
++December 4th: Initial DoS reported to Meta Bug Bounty by RyotaK.
++December 6th: Both issues confirmed by the React team, and the team began investigating.
++December 7th: Initial fixes created and the React team began verifying and planning new patch.
++December 8th: Affected hosting providers and open source projects notified.
++December 10th: Hosting provider mitigations in place and patches verified.
++December 11th: Additional DoS reported to Meta Bug Bounty by Shinsaku Nomura.
++December 11th: Patches published and publicly disclosed as CVE-2025-55183 and CVE-2025-55184.
++December 11th: Missing DoS case found internally, patched and publicly disclosed as CVE-2025-67779.
++Attribution 
++Thank you to Andrew MacPherson (AndrewMohawk) for reporting the Source Code Exposure, RyotaK from GMO Flatt Security Inc and Shinsaku Nomura of Bitforest Co., Ltd. for reporting the Denial of Service vulnerabilities.
++ERC-8021: Transaction Attribution
++A standardized method for attributing transactions to applications and wallets through data suffixes, enabling interoperable attribution tracking and reward distribution.
++
++Authors	
++Conner Swenberg (@ilikesymmetry)
++Created	2025-09-11
++Discussion Link	https://ethereum-magicians.org/t/erc-8021-transaction-attribution/25561
++Requires	
++ERC-4337
++
++EIP-5792
++
++Markdown
++
++https://raw.githubusercontent.com/ilikesymmetry/ER...
++Abstract
++This ERC defines a standardized method for attributing transactions to applications, wallets, and other entities through structured data suffixes appended to transaction calldata. The standard enables interoperable attribution tracking, supports multiple entity attribution per transaction, and provides a mechanism for reward distribution through registered payout addresses.
++
++Motivation
++Currently, applications informally append "data suffixes" to transactions to indicate their origin, typically using the first bytes of a hash representing the application name. For example, Coinbase adds keccak256("CoinbaseSmartWallet") to transactions from keys.coinbase.com, and apps like Zora and OpenSea employ similar approaches.
++
++This ad-hoc approach presents several limitations:
++
++Non-interoperable attribution: Each application uses custom suffix formats, requiring explicit checks for specific patterns to detect attributions
++Opaque identification: Hash-based suffixes obscure the actual application identity, making attribution analysis difficult
++Reward distribution challenges: Even when an application is identified, there's no standardized way to determine where to send rewards
++Limited multi-entity support: No clear mechanism for attributing transactions to multiple entities (e.g., both application and wallet)
++Lack of extensibility: No standardized way to query additional metadata about attributed entities
++This standard addresses these issues by providing a structured, extensible format for transaction attribution that supports multiple entities, reward distribution, and metadata discovery.
++
++Specification
++The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 and RFC 8174.
++
++Data Suffix Schema
++This standard defines a structured data suffix format appended to transaction calldata. The suffix consists of the following components (ordered from end of calldata backwards):
++
++ercSuffix (16 bytes): A special identifier value indicating use of this standard ("8021" repeated)
++schemaId (1 byte): Schema ID number that declares the schema of proceeding bytes with space for forwards compatibility
++schemaData (variable bytes): Data to be parsed according to schemaId
++A schemaId MUST have an associated ERC to be considered valid.
++
++Multi-Attribution Schemas
++Our first schemas enable attributing multiple entities in a single transaction.
++
++Entities are identified by a unique "code" which is a string that follows 7-bit ASCII encoding. A code MUST NOT contain commas (0x2C) as this is reserved as a delimitter for attributing multiple codes.
++
++Codes MUST also be registered in a Code Regsitry smart contract (interface defined in later section). Chains are encouraged to provide canonical code registries which MAY be defined in this or future ERCs.
++
++Schema ID 0 defines the following bytes and assumes chain's canonical Code Registry:
++
++codesLength (1 byte): Length of the codes array in bytes, including delimiters
++codes (variable length): Array of attribution codes using ASCII encoding with comma (0x2C) as delimiter
++Schema ID 1 builds on top of 0, but also defines a custom Code Registry chain and address
++
++codesLength (1 byte): Length of the codes array in bytes, including delimiters
++codes (variable length): Array of attribution codes using ASCII encoding with comma (0x2C) as delimiter
++codeRegistryChainIdLength (1 byte): Length of the chain id hosting the custom Code Registry
++codeRegistryChainId (variable bytes): Chain id hosting the custom Code Registry
++codeRegistryAddress (20 bytes): Address of a smart contract implementing ICodeRegistry
++Custom Code Registries can be referenced across chains for ease of connecting identity for multi-chain apps.
++
++Examples
++The complete suffix format is:
++
++{txData}{schemaData}{schemaId}{ercSuffix}
++Single entity attribution with canonical registry:
++
++{txData}{"baseapp"}{7}{0}{0x80218021802180218021802180218021}
++Multiple entity attribution with custom registry:
++
++{txData}{0xCodeRegistry}{8453}{2}{"baseapp,morpho"}{14}{1}{0x80218021802180218021802180218021}
++Parsing Algorithm
++Offchain parsers SHOULD implement the following algorithm:
++
++Extract the last TBD bytes as ercSuffix and verify it matches the standard identifier
++Extract the previous byte as schemaId
++If schemaId is 0: a. Extract the previous byte as codesLength b. Extract the previous codesLength bytes as codes c. Implicitly set codeRegistryAddress as the registry defined by the host chain d. Parse codes using 0x2C (comma) as delimiter between codes e. Query code-related data from codeRegistryAddress on host chain
++If schemaId is 1: a. Extract the previous byte as codesLength b. Extract the previous codesLength bytes as codes c. Extract the previous byte as codeRegistryChainIdLength d. Extract the previous codeRegistryChainIdLength bytes as codeRegistryChainId e. Extract the previous 20 bytes as codeRegistryAddress f. Parse codes using 0x2C (comma) as delimiter between codes g. Query code-related data from codeRegistryAddress on chain with id codeRegistryChainId
++Else schemaId does not match, parsing SHOULD terminate (unknown schemaId)
++Code Registry Interface
++A Code Registry MUST implement the following interface:
++
++interface ICodeRegistry {
++    /// @notice Fetch a code's address to payout incentives
++    /// @param code The code to query
++    /// @return The address to receive rewards for this code
++    function payoutAddress(string memory code) external view returns (address);
++    
++    /// @notice Fetch a code's URI to fetch for additional metadata
++    /// @param code The code to query  
++    /// @return The URI pointing to metadata about this code
++    function codeURI(string memory code) external view returns (string memory);
++    
++    /// @notice Check if a code is valid format (characters, length, etc)
++    /// @dev MUST return false if code is empty string
++    /// @param code The code to query
++    /// @return True if the code is valid, false otherwise
++    function isValidCode(string memory code) external view returns (bool);
++    
++    /// @notice Check if a code is registered
++    /// @param code The code to query
++    /// @return True if the code is registered, false otherwise
++    function isRegistered(string memory code) external view returns (bool);
++}
++Code Regsitry Canonical Addresses
++Chain ID	Code Registry
++8453	TBD
++84532	TBD
++Code Metadata
++Querying CodeRegistry.codeURI(code) returns a string uri to fetch actual metadata, following from NFT patterns. The returned metadata SHOULD include these fields:
++
++type CodeMetadata = {
++    app: {
++      name: string
++      url: string
++    }
++}
++Future ERCs can extend this schema.
++
++ERC-5792 Integration
++Applications using ERC-5792's wallet_sendCalls RPC method MUST communicate attribution data through a new capability:
++
++interface DataSuffixCapability {
++  dataSuffix: string; // Hex-encoded bytes to append as suffix
++}
++Wallets implementing this capability MUST append the provided dataSuffix bytes to the transaction calldata. Wallets MAY optionally insert their own attribution code before the application's suffix if they understand this standard.
++
++ERC-4337 User Operation Implementation
++For ERC-4337 compliant smart accounts, the implementation differs from normal Ethereum transactions:
++
++Normal Transactions: The attribution suffix is appended to the data field of the top-level Ethereum transaction.
++
++ERC-4337 User Operations: The attribution suffix MUST be appended to the userOp.callData field instead of the transaction-level data field, since smart account transactions are executed through the EntryPoint contract where the actual call data is contained within the user operation structure.
++
++When implementing attribution for smart accounts:
++
++Applications SHOULD append the suffix to userOp.callData when constructing user operations
++Parsers MUST examine the callData field of user operations rather than transaction data when processing ERC-4337 transactions
++Wallets supporting both EOA and smart account transactions MUST handle suffix appending appropriately based on the account type
++This ensures attribution data remains accessible and parseable regardless of whether the transaction originates from an externally owned account (EOA) or a smart contract account following ERC-4337.
++
++Rationale
++Design Decisions
++Reverse-order parsing: The suffix format is designed for parsing from the end of calldata backwards, enabling efficient detection of attribution without requiring knowledge of the original calldata length.
++
++schemaId byte: Including a schemaId field enables future extensions and optimizations in minimizing attribution data.
++
++Registry pattern: Using a registry contract allows entities to update their payout addresses and metadata without requiring transaction format changes.
++
++ASCII encoding: Using human-readable ASCII codes improves debuggability and allows for meaningful code names rather than opaque hashes.
++
++ERC-5792 integration: The capability-based approach aligns with ERC-5792's extensible design while providing a clean separation of concerns between applications and wallets.
++
++Alternative Approaches Considered
++Customizable registry: While a single global registry is recommended when available for reduced transaction data, the flexible registry approach allows different ecosystems to maintain their own attribution systems.
++
++Fixed-length codes: A fixed-length encoding was considered but rejected to allow for flexible, human-readable identifiers.
++
++ERC-721 dependency: While codes may be implemented as ERC-721 NFTs, reducing strict dependencies makes this proposal more flexible and clarifies the minimal interface truly required for attribution.
++
++Structured ERC-5792 capability: A generic bytes dataSuffix minimizes the effort on wallets to integrate and maintain support for new schemaIds, increasing chances of wide adoption.
++
++Backwards Compatibility
++This standard is fully backward compatible with existing transaction formats. Transactions without attribution suffixes continue to function normally, and the presence of attribution data does not affect transaction execution.
++
++Existing applications using informal attribution methods can migrate to this standard while maintaining their current functionality during the transition period.
++
++Security Considerations
++Parsing Safety
++Parsers MUST validate the suffix format before processing to prevent malformed data from causing errors. Invalid suffixes SHOULD be ignored rather than causing parsing failures.
++
++Registry Trust
++The security of attribution data depends on the trustworthiness of the registry contract. Users and applications SHOULD verify the registry implementation and governance before relying on its data.
++
++Data Integrity
++Since attribution data is appended to calldata, it could potentially be modified by intermediaries. Applications requiring cryptographic proof of attribution should implement additional signature-based verification mechanisms.
++
++Privacy Considerations
++Attribution data is publicly visible on-chain. Applications handling sensitive user information SHOULD NOT include identifying information in attribution codes.
++
++Test Cases
++Single entity attribution + canonical registry:
++
++Input: 0xdddddddd62617365617070070080218021802180218021802180218021
++Expected: 
++- txData: 0xdddddddd
++- schemaId: 0
++- codes: ["baseapp"]
++- registry: canonical
++Multiple entity attribution + custom registry:
++
++Input: 0xddddddddcccccccccccccccccccccccccccccccccccccccc210502626173656170702C6D6F7270686F0E0180218021802180218021802180218021
++Expected:
++- txData: 0xdddddddd
++- schemaId: 1
++- codes: ["baseapp", "morpho"]
++- codeRegistryChainId: 8453
++- codeRegistryAddress: 0xcccccccccccccccccccccccccccccccccccccccc
++Invalid schemaId handling:
++
++Input: 0xddddddddff80218021802180218021802180218021
++Expected: Parsing stops, unknown schemaId
++# Base Builder Codes
++
++> Integrate Builder Codes to attribute onchain activity to your app or wallet.
++
++## What are Builder Codes
++
++Base Builder Codes are an ERC-721 NFT collection where unique codes (e.g. “abc123”) are minted to help identify builders onchain.
++
++Each code has associated metadata. Onchain metadata primarily includes a “payout address” where each code declares where potential rewards should be sent to. Offchain metadata includes more details about the app including its name and site.
++
++## Automatic Builder-Code Attribution on Base
++
++Once your app is registered on [Base.dev](http://base.dev/), the Base App will auto-append your Base Builder Code to transactions its users make in your app (e.g. via your mini app, or the Base App's browser). This powers your onchain analytics in [Base.dev](http://base.dev/) and qualifies you for potential future rewards.
++
++## For App Developers
++
++<Note>
++  Mini Apps in the Base app will have their builder codes auto-appended to their transactions.
++  Be sure to [register for Base.dev](https://base.dev/)
++</Note>
++
++Integrating Builder Codes requires appending a suffix—provided by Base—to your transaction data.
++
++<Steps>
++  <Step title="Get your Builder Code">
++    When you register on **base.dev**, you will receive a **Builder Code**. This is a random string (e.g., `k3p9da`) that you will use to generate your attribution suffix.
++  </Step>
++
++  <Step title="Append the Suffix to Transactions">
++    The recommended way to attach your suffix is using `wallet_sendCalls` (ERC-5792). This passes the suffix through a capability, allowing the wallet to handle the attachment automatically for both EOA and Smart Account (ERC-4337) users.
++
++    <Tabs>
++      <Tab title="Wagmi (Recommended)">
++        Use the `useSendCalls` hook from Wagmi's features to pass the `dataSuffix` capability.
++
++        ```typescript lines highlight={14-16} theme={null}
++        import { useSendCalls } from 'wagmi'
++        import { Attribution } from 'ox/erc8021'
++
++        // Your builder code provided by base.dev
++        const builderCode = "abcd1234" 
++        const dataSuffix = Attribution.toDataSuffix({
++            codes: [builderCode]
++        })
++
++        function SendTx() {
++          const { sendCalls } = useSendCalls()
++
++          async function submit() {
++            await sendCalls({
++              calls: [
++                {
++                  to: "0xYourContract",
++                  data: "0xYourCalldata"
++                }
++              ],
++              capabilities: {
++                dataSuffix: dataSuffix
++              }
++            })
++          }
++
++          return <button onClick={submit}>Send</button>
++        }
++        ```
++      </Tab>
++
++      <Tab title="Viem">
++        If you are using Viem directly, pass the `dataSuffix` in the `capabilities` object.
++
++        ```typescript lines highlight={11-13} theme={null}
++        import { walletClient } from './client'
++        import { Attribution } from 'ox/erc8021'
++
++        // Your builder code provided by base.dev
++        const builderCode = "abcd1234" 
++        const dataSuffix = Attribution.toDataSuffix({
++            codes: [builderCode]
++        })
++
++        await walletClient.sendCalls({
++          calls: [
++            {
++              to: "0xYourContract",
++              data: "0xYourCalldata"
++            }
++          ],
++          capabilities: {
++            dataSuffix: dataSuffix
++          }
++        })
++        ```
++      </Tab>
++
++      <Tab title="Legacy (writeContract)">
++        If you are restricted to `writeContract` (EOA only), you must manually append the suffix to the calldata. This is **not recommended** as it does not support Smart Accounts automatically.
++
++        ```typescript lines highlight={15} theme={null}
++        import { encodeFunctionData } from 'viem'
++        import { Attribution } from 'ox/erc8021'
++
++        // Your builder code provided by base.dev
++        const builderCode = "abcd1234" 
++        const dataSuffix = Attribution.toDataSuffix({
++            codes: [builderCode]
++        })
++
++        // 1. Encode your function call
++        const encoded = encodeFunctionData({
++          abi,
++          functionName: "yourFn",
++          args: [a, b, c],
++        })
++
++        // 2. Manually append the suffix (stripping the '0x' prefix from the suffix)
++        const dataWithSuffix = encoded + dataSuffix.slice(2)
++
++        // 3. Send the transaction
++        await sendTransaction({
++          to: "0xYourContract",
++          data: dataWithSuffix,
++        })
++        ```
++      </Tab>
++    </Tabs>
++  </Step>
++</Steps>
++
++Once you have added the suffix, your app is fully ERC-8021 compliant.
++
++***
++
++## For Wallet Developers
++
++Wallet providers need to support the `dataSuffix` capability to enable attribution. This involves accepting the capability and appending the suffix to the calldata before signing.
++
++<Steps>
++  <Step title="Support the dataSuffix Capability">
++    Your wallet should accept a `dataSuffix` string in the `capabilities` object of `wallet_sendCalls`.
++
++    ```typescript lines theme={null}
++    interface DataSuffixCapability {
++      dataSuffix: string; // hex-encoded bytes provided by the app
++    }
++    ```
++  </Step>
++
++  <Step title="Append Suffix to Calldata">
++    When constructing the transaction or User Operation, extract the `dataSuffix` and append it to the calldata.
++
++    <Tabs>
++      <Tab title="EOA Transactions">
++        Append to `tx.data`.
++
++        ```typescript lines theme={null}
++        // Minimal example for EOA
++        function applySuffixToEOA(tx, capabilities) {
++          const suffix = capabilities.find(c => c.dataSuffix)?.dataSuffix
++          if (!suffix) return tx
++
++          return {
++            ...tx,
++            // Append suffix bytes (remove 0x prefix from suffix if tx.data has it)
++            data: tx.data + suffix.slice(2) 
++          }
++        }
++        ```
++      </Tab>
++
++      <Tab title="ERC-4337 User Operations">
++        Append to `userOp.callData` (not the transaction-level calldata).
++
++        ```typescript lines theme={null}
++        // Minimal example for ERC-4337
++        function applySuffixToUserOp(userOp, capabilities) {
++          const suffix = capabilities.find(c => c.dataSuffix)?.dataSuffix
++          if (!suffix) return userOp
++
++          return {
++            ...userOp,
++            // Append suffix bytes to the UserOp callData
++            callData: userOp.callData + suffix.slice(2)
++          }
++        }
++        ```
++      </Tab>
++    </Tabs>
++  </Step>
++
++  <Step title="(Optional) Add Wallet Attribution">
++    Wallets may also include their own attribution code (their own ERC-8021 suffix) by simply prepending the wallet’s own suffix before the app’s.
++
++    * **No interaction required with apps:** The wallet handles this independently.
++    * **Multi-code support:** ERC-8021 natively supports multiple attribution codes.
++
++    **Example:**
++
++    ```typescript  theme={null}
++    finalSuffix = walletSuffix + appSuffix
++    ```
++
++    This ensures both the app and the wallet receive onchain attribution.
++  </Step>
++</Steps>
++
++## For Base-Solana Bridge Developers
++
++<Warning>
++  Onchain Builder codes are currently still not live on mainnet.
++</Warning>
++
++Builder codes work with the [Base-Solana bridge](/base-chain/quickstart/base-solana-bridge) via the `hookData` mechanism. Currently available for **Solana → Base** flows only.
++
++<Steps>
++  <Step title="Get your Builder Code">
++    When you register on base.dev, you will receive a Builder Code. This is a random string (e.g., k3p9da) that you will use to generate your attribution suffix.
++  </Step>
++
++  <Step title="Build hookData">
++    ABI-encode the user address, your code, and fee:
++
++    ```solidity  theme={null}
++    bytes memory hookData = abi.encode(
++      0xUSER,           // destination address on Base (NOT the Twin)
++      0xBUILDER_CODE,   // your bytes32 code
++      100               // feeBps (100 = 1%)
++    );
++    ```
++  </Step>
++
++  <Step title="Attach to Bridge Message">
++    Set `to = BRIDGE_CAMPAIGN_ADDRESS` and attach a call to `Flywheel.send`.
++
++    <Tabs>
++      <Tab title="Simple Bridge">
++        For a bridge with no follow-up call:
++
++        ```
++        to:     <BRIDGE_CAMPAIGN_ADDRESS>
++        amount: 100
++        call:
++          ty:    Call
++          to:    <FLYWHEEL_ADDRESS>
++          value: 0
++          data:  abi.encodeWithSelector(
++                   Flywheel.send.selector,
++                   <BRIDGE_CAMPAIGN_ADDRESS>,
++                   <wSOL_ADDRESS>,
++                   hookData
++                 )
++        ```
++      </Tab>
++
++      <Tab title="Bridge + Follow-Up Call">
++        To chain additional calls, use `DelegateCall` with `Multicall`:
++
++        ```solidity  theme={null}
++        Call[] memory calls = new Call[](2);
++
++        // 1) Flywheel attribution (must be first)
++        calls[0] = Call({
++          to:    <FLYWHEEL_ADDRESS>,
++          value: 0,
++          data:  abi.encodeWithSelector(
++                   Flywheel.send.selector,
++                   <BRIDGE_CAMPAIGN_ADDRESS>,
++                   <wSOL_ADDRESS>, // 0x311935Cd80B76769bF2ecC9D8Ab7635b2139cf82 on Base Mainnet
++                   hookData
++                 )
++        });
++
++        // 2) Your follow-up call
++        calls[1] = Call({
++          to:    <YOUR_CONTRACT>,
++          value: 0,
++          data:  abi.encodeWithSelector(YourContract.yourFunction.selector)
++        });
++        ```
++
++        Then set the bridge call to:
++
++        ```
++        call:
++          ty:    DelegateCall
++          to:    <MULTICALL_ADDRESS> // 0xcA11bde05977b3631167028862bE2a173976CA11 on Base Mainnet
++          data:  abi.encodeWithSelector(Multicall.multicall.selector, calls)
++        ```
++      </Tab>
++    </Tabs>
++  </Step>
++</Steps>
++
++***
++
++## Give feedback!
++
++<Note>
++  We're constantly working to improve the Builder Codes experience. If you have any feedback, please let us know  [here](https://t.co/zwvtmXXzGz).
++</Note>
++
++
++---
++
++> To find navigation and other pages in this documentation, fetc
++add-mini-app.tsx
++
++# Featured Checklist
++
++> Build high quality mini apps to get more distribution.
++
++Your app must meet all product, design, and technical guidelines outlined below. Meeting these guidelines is a prerequisite for featured placement, but **does not guarantee placement**. Base holds a very high bar for featured placement.
++
++<Note>
++  To submit your app for featured placement, first verify your mini app in the [Base Build dashboard](https://base.dev/), then fill out the [submission form](https://buildonbase.deform.cc/getstarted/).
++</Note>
++
++<Steps titleSize="h3">
++  <Step title="Authentication">
++    * In-app authentication stays within the Base app with no external redirects
++    * Wallet connection happens automatically
++    * No email or phone verification inside the app
++  </Step>
++
++  <Step title="Onboarding Flow">
++    * Explain the purpose of the app and how to get started, with clear onboarding instructions either on the home page or as a a pop-up window.
++    * App only requests essential personal information, with clear context
++    * Display user's avatar and username **(no 0x addresses)**
++  </Step>
++
++  <Step title="Base Compatibility">
++    * App is client-agnostic, with no hard-coded Farcaster text or links, or other client-specific behavior
++    * Transactions are sponsored
++  </Step>
++
++  <Step title="Layout">
++    * Call to actions are visible and centered on page
++    * App has a bottom navigation bar or side menu to easily access core flow
++    * All buttons are accessible and not cut off
++    * Navigation bar items have clear, understandable labels
++  </Step>
++
++  <Step title="Load Time">
++    * App loads within **3 seconds**
++
++    * In-app actions complete within **1 second**
++
++    * Loading indicators are shown during actions
++  </Step>
++
++  <Step title="Usability">
++    * App supports **light and dark modes** consistently
++    * App has minimum **44px touch targets**
++  </Step>
++
++  <Step title="App Metadata">
++    * App description is clear, concise, and user-focused
++    * App icon is **1024×1024 px**, PNG, **no transparency**, readable at small sizes
++    * App cover photo is **high quality**, does not contain Base logo or team photos, and is 1200×630px (1.91:1) dimensions, PNG/JPG.
++    * Include 3 screenshots that highlight key app functionality. Use portrait orientation with 1284x2778 dimensions.
++    * Subtitle should be descriptive and specific, and use sentence case capitalization with no punctuation at the end.
++  </Step>
++</Steps>
++
++## Next Steps
++
++<CardGroup>
++  <Card title="Product Guidelines" icon="lightbulb" href="/mini-apps/featured-guidelines/product-guidelines" />
++
++  <Card title="Design Guidelines" icon="brush" href="/mini-apps/featured-guidelines/design-guidelines" />
++
++  <Card title="Technical Guidelines" icon="wrench" href="/mini-apps/featured-guidelines/technical-guidelines" />
++
++  <Card title="Notification Guidelines" icon="bell" href="/mini-apps/featured-guidelines/notification-guidelines" />
++</CardGroup>
++
++
++---
++
++> To find navigation and other pages in this documentation, fetch the llms.txt file at: https://docs.base.org/llms.txt
++Manifest
++
++> Define how your mini app appears and behaves within the Base app, enabling search, discovery, and rich embed features in the Base app.
++
++<Panel>
++  ```json farcaster.json theme={null}
++  {
++    "accountAssociation": {
++      "header": "eyJmaWQiOjkxNTIsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMmVmNzkwRGQ3OTkzQTM1ZkQ4NDdDMDUzRURkQUU5NDBEMDU1NTk2In0",
++      "payload": "eyJkb21haW4iOiJhcHAuZXhhbXBsZS5jb20ifQ",
++      "signature": "MHgxMGQwZGU4ZGYwZDUwZTdmMGIxN2YxMTU2NDI1MjRmZTY0MTUyZGU4ZGU1MWU0MThiYjU4ZjVmZmQxYjRjNDBiNGVlZTRhNDcwNmVmNjhlMzQ0ZGQ5MDBkYmQyMmNlMmVlZGY5ZGQ0N2JlNWRmNzMwYzUxNjE4OWVjZDJjY2Y0MDFj"
++    },
++    "miniapp": {
++      "version": "1",
++      "name": "Crypto Portfolio Tracker",
++      "homeUrl": "https://ex.co",
++      "iconUrl": "https://ex.co/i.png",
++      "splashImageUrl": "https://ex.co/l.png",
++      "splashBackgroundColor": "#000000",
++      "subtitle": "Easy to manage",
++      "description": "Track and manage your cryptocurrency portfolio.",
++      "screenshotUrls": [
++        "https://ex.co/s1.png",
++        "https://ex.co/s2.png",
++        "https://ex.co/s3.png"
++      ],
++      "primaryCategory": "finance",
++      "tags": ["finance"],
++      "heroImageUrl": "https://ex.co/og.png",
++      "tagline": "Save instantly",
++      "ogTitle": "Example Mini App",
++      "ogDescription": "Easy to manage portfolio.",
++      "ogImageUrl": "https://ex.co/og.png",
++      "noindex": true
++    }
++  }
++  ```
++
++  <Tip>
++    Set `"noindex": true` for development or staging environments to prevent search indexing.
++  </Tip>
++</Panel>
++
++## Implementation
++
++1. Create the manifest file in your project at `/public/.well-known/farcaster.json`. It needs to be accessible at `https://your-domain.com/.well-known/farcaster.json`
++2. Update the [required](#accountassociation) and [optional](#display-information) fields in the `miniapp` object
++3. Ensure all changes are live so that the Manifest file is available at your app's url
++4. Navigate to the Base Build [Account association tool](https://www.base.dev/preview?tab=account)
++5. Paste your domain in the App URL field (ex: sample-url.vercel.app) and click "Submit"
++6. Click on the "Verify" button that appears and sign the manifest with your wallet to generate the `accountAssociation` fields
++7. Copy the generated `accountAssociation` fields (header, payload, and signature) and paste them into your manifest file, replacing the empty values in the `accountAssociation` object
++
++<Warning>
++  Changes to the manifest take effect when you redeploy your Mini App and repost it. The platform re-indexes the updated configuration and applies changes to search, discovery, and embed rendering.
++</Warning>
++
++<Tip>
++  Use the [Mini App Assets Generator](https://www.miniappassets.com/) to generate properly formatted icons, splash screens, and images that meet the requirements for both Base App and Farcaster mini apps.
++</Tip>
++
++## Schema
++
++### accountAssociation
++
++Proves domain ownership for your Mini App.
++
++<Card>
++  <ParamField path="header" type="string" required>
++    Encoded header for the association payload.
++  </ParamField>
++
++  <ParamField path="payload" type="string" required>
++    Encoded payload containing your domain.
++  </ParamField>
++
++  <ParamField path="signature" type="string" required>
++    Signature over the payload.
++  </ParamField>
++</Card>
++
++#### Identity & Launch
++
++Defines your Mini App's core identity and the URL users land on when they open it.
++
++<Card>
++  <ParamField path="version" type="string" required>
++    Manifest version. Must be `"1"`.
++  </ParamField>
++
++  <ParamField path="name" type="string" required>
++    Mini App name. Max 32 chars.
++  </ParamField>
++
++  <ParamField path="homeUrl" type="string" required>
++    Default launch URL. HTTPS URL, max 1024 chars.
++  </ParamField>
++
++  <ParamField path="iconUrl" type="string" required>
++    Icon image URL. HTTPS URL, PNG 1024×1024; transparent background discouraged.
++  </ParamField>
++</Card>
++
++#### Loading Experience
++
++Controls the splash screen visuals and colors shown while your Mini App loads.
++
++<Card>
++  <ParamField path="splashImageUrl" type="string" required>
++    Loading image. HTTPS URL, recommended 200×200px.
++  </ParamField>
++
++  <ParamField path="splashBackgroundColor" type="string" required>
++    Loading background color. Hex code (e.g., `#000000`).
++  </ParamField>
++</Card>
++
++#### Discovery & Search
++
++Determines how your Mini App is indexed, categorized, and surfaced across Base App discovery features.
++
++<Card>
++  <ParamField path="primaryCategory" type="string" required>
++    Controls where your app appears in category browsing. One of: `games`, `social`, `finance`, `utility`, `productivity`, `health-fitness`, `news-media`, `music`, `shopping`, `education`, `developer-tools`, `entertainment`, `art-creativity`.
++  </ParamField>
++
++  <ParamField path="tags" type="string[]" required>
++    Search/filter tags. Up to 5; ≤ 20 chars each; lowercase; no spaces/emojis/special chars.
++  </ParamField>
++
++  <ParamField path="noindex" type="boolean">
++    Exclude from search results. `true` = exclude, default = include.
++  </ParamField>
++</Card>
++
++#### Display Information
++
++Provides the descriptive text, screenshots, and promotional images shown on your Mini App's profile.
++
++<Card>
++  <ParamField path="subtitle" type="string">
++    Short description under name. Max 30 chars; avoid emojis/special chars.
++  </ParamField>
++
++  <ParamField path="description" type="string">
++    Promo text for app page. Max 170 chars; avoid emojis/special chars.
++  </ParamField>
++
++  <ParamField path="tagline" type="string" required>
++    Marketing tagline. Max 30 chars.
++  </ParamField>
++
++  <ParamField path="heroImageUrl" type="string" required>
++    Large promo image. 1200×630px (1.91:1), PNG/JPG.
++  </ParamField>
++
++  <ParamField path="screenshotUrls" type="string[]" required>
++    Visual previews. Max 3; portrait 1284×2778px recommended.
++  </ParamField>
++</Card>
++
++#### Notifications
++
++Notification endpoint.
++
++<Card>
++  <ParamField path="webhookUrl" type="string">
++    POST events endpoint. HTTPS URL, max 1024 chars. Required if using notifications.
++  </ParamField>
++</Card>
++
++<Warning>
++  Only add webhookUrl if you are using notifications or save functionality. This must be a valid URL.
++</Warning>
++
++#### Embeds & Social Sharing
++
++Configures how your Mini App appears when shared in feeds or on social platforms.
++
++<Card>
++  <ParamField path="ogTitle" type="string">
++    Open Graph title. Max 30 chars.
++  </ParamField>
++
++  <ParamField path="ogDescription" type="string">
++    Open Graph description. Max 100 chars.
++  </ParamField>
++
++  <ParamField path="ogImageUrl" type="string">
++    Open Graph image. 1200×630px (1.91:1), PNG/JPG.
++  </ParamField>
++</Card>
++
++## Related Concepts
++
++<CardGroup cols={1}>
++  <Card title="Embeds and Previews" href="/mini-apps/core-concepts/embeds-and-previews">
++    Understand how your manifest creates rich embeds when your Mini App is shared in feeds and social platforms.
++  </Card>
++</CardGroup>
++
++
++---
++
++> To find navigation and other pages in this documentation, fetch the llms.txt file at: https://docs.base.org/llms.txt
++
